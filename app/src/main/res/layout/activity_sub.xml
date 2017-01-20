@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_sub"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1"
+    android:orientation="vertical"
+    tools:context="com.example.n1240036.transfer.SubActivity"
+    tools:background="@android:color/black"
+    android:background="@android:color/black">
+
+    <TextView
+        android:text="@string/textview"
+        android:layout_width="match_parent"
+        android:layout_height="79dp"
+        android:id="@+id/textView"
+        android:textSize="56sp"
+        android:textAlignment="center"
+        android:textColor="@android:color/white" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="359dp"
+        android:id="@+id/list2"
+        android:background="@android:color/transparent"
+        android:dividerHeight="@dimen/activity_vertical_margin"
+        android:layout_gravity="fill_vertical|fill_horizontal" />
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="previous_Click"
+            android:id="@+id/media_previous"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill"
+            tools:ignore="ContentDescription"
+            android:background="@android:drawable/ic_media_previous" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:id="@+id/media_play_stop"
+            android:onClick="play_Click"
+            android:layout_gravity="fill"
+            android:layout_columnWeight="1"
+            android:background="@android:drawable/ic_media_play"
+            tools:ignore="ContentDescription" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:onClick="next_Click"
+            android:id="@+id/media_next"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill"
+            tools:ignore="ContentDescription"
+            android:background="@android:drawable/ic_media_next" />
+    </GridLayout>
+
+</LinearLayout>

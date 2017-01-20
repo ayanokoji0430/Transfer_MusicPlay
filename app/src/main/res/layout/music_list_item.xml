@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/music_list_item"
+    android:layout_width="match_parent"
+    android:textColor="@android:color/background_light"
+    android:textSize="20sp"
+    android:fontFamily="sans-serif"
+    android:layout_height="match_parent"
+    android:background="@drawable/list_item_selector"/>
