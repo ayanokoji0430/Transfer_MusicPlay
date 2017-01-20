@@ -164,7 +164,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        int a=1;
         return format_result;
     }
 }
