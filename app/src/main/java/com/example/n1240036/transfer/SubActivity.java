@@ -3,16 +3,25 @@ package com.example.n1240036.transfer;
 
 import android.app.*;
 import android.content.ContentResolver;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.Image;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.*;
@@ -20,19 +29,25 @@ import android.widget.*;
 /**
  * Created by n1240036 on 2016/11/09.
  */
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Random;
 
-public class SubActivity extends AppCompatActivity implements OnCompletionListener{
+public class SubActivity extends AppCompatActivity {
 
     private MediaPlayer mp = null;
-    private ArrayList<Music_Item>play_list;
-    private int current_song_num;
-    private int ride_time;
+    private ArrayList<Music_Item_NonImage> play_list_nonImage;
+    private MusicAdapter musicAdapter;
     private long play_duration;
-    private int before_num;
+    private int ride_time;
+    private Date departure=null;
+    private AlarmManager am;
+    private PendingIntent pending;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,154 +60,73 @@ public class SubActivity extends AppCompatActivity implements OnCompletionListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sub);
         play_duration=0;
-        current_song_num=0;
-        before_num=0;
-        statusBarNitify();
         ContentResolver resolver = this.getContentResolver();
         Cursor cursor = resolver.query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI ,
                 new String[]{
                         MediaStore.Audio.Media.TITLE ,
                         MediaStore.Audio.Media.DATA,
-                        MediaStore.Audio.Media.DURATION
+                        MediaStore.Audio.Media.DURATION,
+                        MediaStore.Audio.Media.ARTIST
                 },
                 null ,
                 null ,
                 null
         );
-        ArrayList<Music_Item> Music_items= new ArrayList<>();
-        play_list=new ArrayList<>();
-        ride_time = ((int) getIntent().getSerializableExtra("ride_time"))*60;
+        ArrayList<Music_Item_NonImage> Music_items= new ArrayList<Music_Item_NonImage>();
+        ArrayList<Music_Item> play_list=new ArrayList<Music_Item>();
+        play_list_nonImage=new ArrayList<Music_Item_NonImage>();
+        Intent intent = getIntent();
+        Departure_RideTime dr = (Departure_RideTime) intent.getSerializableExtra("Departure_RideTime");
+        ride_time = (dr.getride_time())*60;
+        departure=dr.getDeparture();
         TextView text_view = (TextView) findViewById(R.id.textView);
 
         while(cursor.moveToNext()){
+
             if( cursor.getLong(cursor.getColumnIndex( MediaStore.Audio.Media.DURATION)) < 10000 ){continue;}
-            Music_Item mi=new Music_Item();
+            Music_Item_NonImage mi=new Music_Item_NonImage();
             mi.setTitleData(cursor.getString(cursor.getColumnIndex( MediaStore.Audio.Media.TITLE)));
+            mi.setArtist(cursor.getString(cursor.getColumnIndex( MediaStore.Audio.Media.ARTIST)));
             mi.setPathData(cursor.getString(cursor.getColumnIndex( MediaStore.Audio.Media.DATA)));
             mi.setDurationData(cursor.getLong(cursor.getColumnIndex( MediaStore.Audio.Media.DURATION))/1000);
             Music_items.add(mi);
         }
-        play_list=shuffle(Music_items);
-        MusicAdapter musicAdapter=new MusicAdapter(this, R.layout.music_list_item,play_list);
+        play_list_nonImage=shuffle(Music_items);
+        Album_Art album_a=new Album_Art();
+        for (Music_Item_NonImage item_nonImage:play_list_nonImage  ) {
+            Music_Item item=new Music_Item();
+            Bitmap artwork=album_a.getArtWork(item_nonImage.getPathData());
+            item.setPathData(item_nonImage.getPathData());
+            item.setArtist(item_nonImage.getArtst());
+            item.setTitleData(item_nonImage.getTitleData());
+            item.setDurationData(item.getDurationData());
+            item.setArtwork(artwork);
+            play_list.add(item);
+        }
 
-        text_view.setText(play_duration/60+"分 "+play_duration%60+"秒");
-        mp = new MediaPlayer();
-        mp.setOnCompletionListener(this);
-        set_song_path();
+
+        musicAdapter=new MusicAdapter(this, R.layout.music_list_item,play_list);
+
+        text_view.setText(play_duration/60+"min "+play_duration%60+"s");
 
         ListView listview=(ListView)findViewById(R.id.list2);
         listview.setSelector(new ColorDrawable(Color.rgb(153,204,0)));
         listview.setAdapter(musicAdapter);
-        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent,
-                                    View view, int pos, long id) {  mp.stop();
-                mp.reset();
-                current_song_num=pos;
-                set_song_path();
-                play(mp);
-                View a=view;
-                int e=1;
-                view.setSelected(true);
-                int b=0;
-            }
-        });
-        play(mp);
-    }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        requestVisibleBehind(true);
     }
 
-
-    protected void play_Click(View v) {
-        if(mp.isPlaying()){
-            mp.stop();
-            ((Button)findViewById(R.id.media_play_stop)).setBackgroundResource(android.R.drawable.ic_media_play);
-
-        }else{
-            play(mp);
-        }
-        move_selected();
-    }
-
-    protected void previous_Click(View v) {
-        before_num=current_song_num;
-        if(current_song_num<=0){
-            current_song_num=play_list.size()-1;
-        }else{
-            current_song_num--;
-        }
-        mp.stop();
-        mp.reset();
-        set_song_path();
-        play(mp);
-        move_selected();
-    }
-
-    protected void next_Click(View v) {
-        before_num=current_song_num;
-        if(current_song_num>=play_list.size()-1){
-            current_song_num=0;
-        }else{
-            current_song_num++;
-        }
-        mp.stop();
-        mp.reset();
-        set_song_path();
-
-        String a="A";
-        play(mp);
-        move_selected();
-    }
-    @Override
-    protected void onDestroy() {
-        // TODO Auto-generated method stub
-        super.onDestroy();
-        Log.v("MediaPlayer", "onDestroy");
-        if (mp.isPlaying()) {
-            mp.stop();
-         }
-        mp.release();
-     }
-
-    private void set_song_path(){
-        try {
-            mp.setDataSource(play_list.get(current_song_num).getPathData());
-        } catch (IOException e) {
-            aleart("ファイルを再生できません");
-        }
-    }
-    private void aleart(String s){
-        AlertDialog.Builder alertDlg = new AlertDialog.Builder(this);
-        alertDlg.setTitle("alert");
-        alertDlg.setMessage(s);
-        alertDlg.create().show();
-    }
-
-    private void play(MediaPlayer mp_tmp){
-        try {
-            mp_tmp.prepare();
-        } catch (IOException e) {
-            aleart("ファイルを再生できません");
-        }
-        mp.start();
-        ((Button)findViewById(R.id.media_play_stop)).setBackgroundResource(android.R.drawable.ic_media_pause);
-    }
-
-    private ArrayList<Music_Item> shuffle(ArrayList<Music_Item> musics){
+    private ArrayList<Music_Item_NonImage> shuffle(ArrayList<Music_Item_NonImage> musics){
         boolean successful =false;
-        ArrayList<Music_Item> max=new ArrayList<Music_Item>();
+        ArrayList<Music_Item_NonImage> max=new ArrayList<Music_Item_NonImage>();
         int max_num=0;
         Random rnd = new Random();
         for(int i = 0; i<300&&!successful; i++){
             Collections.shuffle(musics);
             int tmp_num=0;
 
-            ArrayList<Music_Item> tmp=new ArrayList<Music_Item>();
+            ArrayList<Music_Item_NonImage> tmp=new ArrayList<Music_Item_NonImage>();
             int random_push_num=rnd.nextInt(musics.size());
-            Music_Item music=musics.get(random_push_num);
+            Music_Item_NonImage music=musics.get(random_push_num);
             while(tmp_num+music.getDurationData()<ride_time){
                 tmp.add(music);
                 tmp_num+=music.getDurationData();
@@ -209,53 +143,48 @@ public class SubActivity extends AppCompatActivity implements OnCompletionListen
                 successful = true;
             }
         }
-        ArrayList<Music_Item> result=max;
+        ArrayList<Music_Item_NonImage> result=max;
         play_duration=max_num;
         return result;
     }
+    protected void start_alarm(View v){
+        AlertDialog.Builder alertDlg = new AlertDialog.Builder(SubActivity.this);
+        alertDlg.setTitle("再生の予約");
+        alertDlg.setMessage("");
+        alertDlg.setPositiveButton(
+                "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTime(departure);
+                        Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class);
+                        intent.putExtra("PlayList",play_list_nonImage);
+                        pending = PendingIntent.getBroadcast(SubActivity.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        am = (AlarmManager) getSystemService(ALARM_SERVICE);
+                        am.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pending);
+                    }
+                });
+        alertDlg.setNegativeButton(
+                "Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        return;
+                    }
+                });
+        alertDlg.create().show();
 
+    }
     @Override
-    public void onCompletion(MediaPlayer mp_tmp) {
-        before_num=current_song_num;
-        if(current_song_num>=play_list.size()-1){
-            return;
-        }else{
-            current_song_num++;
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK) {
+            if (am != null) {
+                am.cancel(pending);
+            }
+            return super.onKeyDown(keyCode, event);
+        } else {
+            return super.onKeyDown(keyCode, event);
         }
-        mp_tmp.stop();
-        mp_tmp.reset();
-        set_song_path();
-        play(mp_tmp);
-        move_selected();
     }
 
-    public void move_selected(){
-        ((ListView)findViewById(R.id.list2)).getChildAt(before_num).setSelected(false);
-        ((ListView)findViewById(R.id.list2)).getChildAt(current_song_num).setSelected(true);
-    }
-
-    private void statusBarNitify() {
-
-        Intent resultIntent = new Intent(String.valueOf(this));
-
-        PendingIntent resultPendingIntent =PendingIntent.getActivity(this,0,resultIntent,PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder mBuilder =(NotificationCompat.Builder) new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("アラーム起動")
-                        .setContentText("音楽がランダムで再生されています")
-                        .setAutoCancel(true)
-
-                .setTicker("notification is displayed !!");
-
-        mBuilder.setContentIntent(resultPendingIntent);
-        //mBuilder.build().flags |= Notification.FLAG_AUTO_CANCEL;
-
-        int mNotificationId = 001;
-
-        NotificationManager mNotifyMgr =(NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-        mNotifyMgr.notify(mNotificationId, mBuilder.build());
-    }
 
 }

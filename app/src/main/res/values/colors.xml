@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#00b000</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#00e200</color>
 
-    <color name="form_color">#00b000</color>
-    <color name="selected_list_item_color">#00e200</color>
     <color name="default_color">#000000</color>
 </resources>

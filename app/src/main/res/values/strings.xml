@@ -3,5 +3,6 @@
     <string name="title">title</string>
     <string name="textview">TextView</string>
     <string name="serch_form">検索</string>
+    <string name="button">Button</string>
 </resources>
 

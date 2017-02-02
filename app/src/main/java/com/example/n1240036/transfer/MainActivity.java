@@ -4,11 +4,16 @@ import android.app.*;
 import android.content.*;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import android.view.View;
 import android.app.AlertDialog;
+
+import com.beardedhen.androidbootstrap.BootstrapAlert;
+
 import org.json.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -17,15 +22,67 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<JSONObject>{
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<JSONObject>,JsonManager.MyClassCallbacks{
 
     private Date departure_format;
+    private JsonManager jm=new JsonManager(this);
+    private String APIKEY=AAAAAAAAAAAAA
+    private String APIKEY2=AAAAAAAAAAA
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        //((AutoCompleteTextView)findViewById(R.id.search_from)).setThreshold(4);
+        setContentView(R.layout.activity_main);
+        final AutoCompleteTextView from_text_view=(AutoCompleteTextView) findViewById(R.id.search_from);
+        final AutoCompleteTextView to_text_view=(AutoCompleteTextView) findViewById(R.id.search_to);
+        jm.setCallbacks(this);
+        from_text_view.setThreshold(2);
+        TextWatcher watchHandler = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Jsonデータ取得
+                    if(s.length()>=2) {
+                            jm.runDataLoader(APIKEY, s.toString(),1);
+
+                }
+            }
+
+
+        };
+        TextWatcher watchHandler1 = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Jsonデータ取得/*
+
+
+                if(s.length()>=2) {
+
+                    jm.runDataLoader(APIKEY, s.toString(),2);
+                }
+            }
+        };
+        from_text_view.addTextChangedListener(watchHandler);
+        to_text_view.addTextChangedListener(watchHandler1);
     }
 
     public void onButtonClick(View view){
@@ -39,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         String from="";
         String to="";
-        String APIKEY="2e6759695a335133536d3777494959335a2e356d6936332e4674672f615a44675457757236723075767338";
         try {
             from= URLEncoder.encode(((EditText)findViewById(R.id.search_from)).getText().toString(),"utf-8");
             to= URLEncoder.encode(((EditText)findViewById(R.id.search_to)).getText().toString(),"utf-8");
@@ -47,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             e.printStackTrace();
         }
         StringBuffer urlText =new StringBuffer("https://api.apigw.smt.docomo.ne.jp/ekispertCorp/v1/searchCourse?APIKEY=");
-        urlText.append(APIKEY);
+        urlText.append(APIKEY2);
         urlText.append("&from=");
         urlText.append(from);
         urlText.append("&to=");
@@ -121,24 +177,20 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                         "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                Calendar calendar = Calendar.getInstance();
-                                calendar.setTime(ti.get(pos).Departure);
-                                Intent intent = new Intent(getApplicationContext(), AlarmBroadcastReceiver.class);
-                                intent.putExtra("ride_t",String.valueOf(ride_time));
-                                PendingIntent pending = PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
-
-                                AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-                                am.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pending);
-
-                                Toast.makeText(getApplicationContext(), "Set Alarm ", Toast.LENGTH_SHORT).show();
-
+                                Departure_RideTime dr=new Departure_RideTime();
+                                dr.setDeparture(ti.get(pos).Departure);
+                                dr.setride_time(ride_time);
+                                Intent intent = new Intent(getApplicationContext(), SubActivity.class);
+                                intent.putExtra("Departure_RideTime",dr);
+                                intent.setAction(Intent.ACTION_VIEW);
+                                startActivity(intent);
                             }
                         });
                 alertDlg.setNegativeButton(
                         "Cancel",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                // Cancelボタン押したとき
+                                return;
                             }
                         });
                 alertDlg.create().show();
@@ -165,5 +217,23 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             e.printStackTrace();
         }
         return format_result;
+    }
+
+    @Override
+    public void callbackMethod(List<String> res,int form_num) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,R.layout.list_item,res);
+        AutoCompleteTextView from_text_view=(AutoCompleteTextView) findViewById(R.id.search_from);
+        AutoCompleteTextView to_text_view=(AutoCompleteTextView) findViewById(R.id.search_to);
+        //final ListView from_list=(ListView) findViewById(R.id.from_list);
+        switch (form_num){
+            case 1:
+                from_text_view.setAdapter(adapter);
+                from_text_view.showDropDown();
+                break;
+            case 2:
+                to_text_view.setAdapter(adapter);
+                to_text_view.showDropDown();
+        }
+
     }
 }

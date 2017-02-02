@@ -1,38 +1,24 @@
 package com.example.n1240036.transfer;
 
 
+import android.graphics.Bitmap;
+import android.net.Uri;
 
+import java.io.Serializable;
+import java.net.URI;
 
 /**
  * Created by n1240036 on 2016/11/17.
  */
 
-public class Music_Item
+public class Music_Item extends Music_Item_NonImage
 {
-    private String title;
-    private String path;
-    private long duration;
 
-    public void setTitleData(String title_text) {
-        title = title_text;
-    }
+    private Bitmap artwork;
 
-    public String getTitleData() {
-        return title;
-    }
-    public void setPathData(String path_text) {
-        path = path_text;
-    }
-
-    public String getPathData() {
-        return path;
-    }
-    public void setDurationData(long duration_long) {
-        duration = duration_long;
-    }
-
-    public long getDurationData() {
-        return duration;
+    public void setArtwork(Bitmap artwork) { this.artwork=artwork; }
+    public Bitmap getartwork() {
+        return this.artwork;
     }
 
 }

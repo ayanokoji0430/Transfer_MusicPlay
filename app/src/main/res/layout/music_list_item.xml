@@ -1,9 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/music_list_item"
-    android:layout_width="match_parent"
-    android:textColor="@android:color/background_light"
-    android:textSize="20sp"
-    android:fontFamily="sans-serif"
-    android:layout_height="match_parent"
-    android:background="@drawable/list_item_selector"/>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:dividerHeight="@dimen/activity_vertical_margin"
+    android:layout_marginTop="11dp"
+    >
+
+    <ImageView
+        android:id="@+id/music_list_artwork"
+        android:layout_width="60dip"
+        android:layout_height="60dip"
+        tools:ignore="ContentDescription" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/music_list_item"
+            android:textColor="@android:color/white"
+            android:choiceMode="singleChoice"
+            android:textAlignment="gravity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="19sp"
+            android:fontFamily="sans-serif"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/music_list_artist"
+            android:textColor="@color/bootstrap_gray_light"
+            android:choiceMode="singleChoice"
+            android:textAlignment="gravity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+</LinearLayout>

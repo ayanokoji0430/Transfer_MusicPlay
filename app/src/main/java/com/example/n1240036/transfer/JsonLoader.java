@@ -24,8 +24,8 @@ import java.net.*;
     @Override
     public JSONObject loadInBackground(){
         HttpURLConnection connection = null;
-
         try{
+
             URL url = new URL(urlText);
             connection = (HttpURLConnection)url.openConnection();
             connection.setRequestMethod("GET");
@@ -39,6 +39,7 @@ import java.net.*;
         }
 
         try{
+
             BufferedInputStream inputStream = new BufferedInputStream(connection.getInputStream());
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
@@ -58,6 +59,8 @@ import java.net.*;
         }
         catch (JSONException e) {
             e.printStackTrace();
+        }catch(Exception e){
+            String a="aa";
         }
         return null;
     }

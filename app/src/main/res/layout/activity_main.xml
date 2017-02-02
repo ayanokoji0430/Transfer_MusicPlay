@@ -13,59 +13,73 @@
     android:background="@android:color/black">
 
 
-    <AutoCompleteTextView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:ems="10"
-        android:id="@+id/search_from"
-        android:textSize="30sp"
-        android:selectAllOnFocus="false"
-        tools:ignore="LabelFor"
-        style="@style/TextViewStyle"
-        app:theme="@style/TextViewStyle"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:textColor="@android:color/white"
-        android:textColorLink="@android:color/holo_green_light" />
+        android:layout_height="match_parent"
+        tools:ignore="UselessParent">
 
-    <AutoCompleteTextView
-        android:layout_height="wrap_content"
-        android:inputType="text"
-        android:ems="10"
-        android:id="@+id/search_to"
-        android:textSize="30sp"
-        android:layout_width="match_parent"
-        android:layout_below="@+id/search_from"
-        android:layout_alignParentStart="false"
-        tools:ignore="LabelFor"
-        style="@style/TextViewStyle"
-        app:theme="@style/TextViewStyle"
-        android:textColor="@android:color/white"
-        android:textColorLink="@android:color/holo_green_light" />
+        <AutoCompleteTextView
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:ems="10"
+            android:id="@+id/search_from"
+            android:textSize="30sp"
+            android:layout_width="match_parent"
+            tools:ignore="LabelFor,UnknownId"
+            style="@style/TextViewStyle"
+            app:theme="@style/TextViewStyle"
+            android:textColor="@android:color/white"
+            android:textColorLink="@android:color/holo_green_light" />
 
-    <Button
-        android:text="@string/serch_form"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/do_search"
-        android:onClick="onButtonClick"
-        android:elevation="0dp"
-        android:textSize="25sp"
+        <AutoCompleteTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:ems="10"
+            android:id="@+id/search_to"
+            android:textSize="30sp"
+            android:selectAllOnFocus="false"
+            style="@style/TextViewStyle"
+            app:theme="@style/TextViewStyle"
+            android:textColor="@android:color/white"
+            android:textColorLink="@android:color/holo_green_light"
+            android:layout_alignParentStart="true"
+            tools:ignore="LabelFor,ObsoleteLayoutParam" />
 
-        android:background="@drawable/list_item_selector"
-        android:textColor="@android:color/white"
-        android:layout_below="@+id/search_to"
-        android:layout_alignParentStart="true"
-        android:dividerHeight="@dimen/activity_vertical_margin" />
+        <com.beardedhen.androidbootstrap.BootstrapButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/do_search"
+            android:onClick="onButtonClick"
+            android:elevation="0dp"
+            android:textSize="25sp"
 
-    <ListView
-        android:layout_width="match_parent"
-        android:id="@+id/list1"
-        android:layout_height="320dp"
-        android:layout_below="@+id/do_search"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="12dp" />
+            app:bootstrapBrand="success"
+            app:bootstrapSize="lg"
+            app:buttonMode="regular"
+            app:showOutline="false"
+            app:roundedCorners="true"
+            android:layout_margin="10dp"
+            app:bootstrapText="Search"
+
+
+            android:background="@drawable/list_item_selector"
+            android:textColor="@android:color/white"
+            android:dividerHeight="@dimen/activity_vertical_margin"
+            android:layout_marginTop="11dp"
+            android:layout_alignParentStart="true"
+            tools:ignore="ObsoleteLayoutParam" />
+
+        <ListView
+            android:layout_width="match_parent"
+            android:id="@+id/list1"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/do_search"
+            android:layout_alignParentStart="true"
+            tools:ignore="ObsoleteLayoutParam" />
+
+    </LinearLayout>
 
 
 </RelativeLayout>
